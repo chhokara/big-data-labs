@@ -1,0 +1,16 @@
+For Section 2:
+
+a. What fraction of the total data size (weather-1) was read into Spark when you used the "but different" data set to calculate the same result?
+About 12% of the weather-1 data was read into Spark when I used the weather-1-but-different data set to calculate the same result.
+
+b. What is different in the "but different" data that allows less data to be transferred out of S3 (and thus less S3 charges)? [hint]
+The "but different" data set applies the concept of Hive-style partitioning. It partitions the data by the "observation" column. Therefore, when Spark is told that the input is coming from s3, the optimizer pushes back filtering to the file-reading phase, allowing less data to be transferred out of s3. As a result, when we perform a future query such as filtering on the observation, the query will skip partitions that don't match that observation. 
+
+For Section 3: 
+
+Look up the hourly costs of the m7gd.xlarge instance on the EC2 On-Demand Pricing page. Estimate the cost of processing a dataset ten times as large as reddit-5 using just those 4 instances.
+Total Uptime for processing reddit-5: 2.2min
+Total Uptime for processing 10x reddit-5: approx. ~ 20min
+Hourly cost of 1 m7gd.xlarge instance: $0.2136
+Hourly cost of 4 m7gd.xlarge instances: $0.8544
+Estimated cost of processing 10x reddit-5: approx. ~ $0.2848

@@ -1,0 +1,17 @@
+1. How much of a difference did the .cache() make in your Reddit ETL code?
+
+Testing on reddit-4 dataset:
+
+Without caching: 1m10.150s
+With caching:  0m48.182s 
+
+The .cache() improved my Reddit ETL time by roughly 20 seconds.
+
+2. When would .cache() make code slower than without?
+Using .cache() will make our code slower than without it if we are only using the RDD once in our entire code after caching. This is because caching the RDD causes the executors to consume extra memory which is unnecessary unless we are re-using the RDD multiple times.
+
+3. Under what conditions will the broadcast join be faster than an actual join?
+The broadcast join will be faster than an actual join when we are trying to join an RDD which is small enough to fit in memory, with a significantly larger RDD. This is because broadcasting will make the data within the smaller RDD available for each executor to perform the join without requiring a shuffle. 
+
+4. When will the broadcast join be slower?
+The broadcast join will be slower if we are trying to join two large RDDs. This is because when we broadcast a large RDD to the executors, they will have to consume significantly larger amounts of memory to store the RDD which will result in a slowdown.

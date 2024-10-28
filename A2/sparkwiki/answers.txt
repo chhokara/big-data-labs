@@ -1,0 +1,20 @@
+1. In the WikipediaPopular class, it would be much more interesting to find the page that is most popular, not just the view count (as we did with Spark). What would be necessary to modify your class to do this? (You don't have to actually implement it.)
+
+I would need to change the output value of the mapper so that it gives pairs containing the page name and the page count to the reducer. Similarly, the input value and output value of the reducer would need to change as well. It will now take in (page name, page count) pairs and spit out the pair with the maximum page count.
+
+
+2. An RDD has many methods: it can do many more useful tricks than were at hand with MapReduce. Write a sentence or two to explain the difference between .map and .flatMap. Which is more like the MapReduce concept of mapping?
+
+We use .map when the input size is the same as the output size leading to a direct 1-to-1 mapping. When the output size is different, we can use .flatmap to flatten the result to a single list with all of the values. .map is more like the MapReduce concept of mapping because there is exactly one output generated for each input which is like a 1-to-1 mapping.
+
+
+3. Do the same for .reduce and .reduceByKey. Which is more like the MapReduce concept of reducing?
+
+.reduce takes all elements of an RDD and aggregates them into a single output. .reduceByKey only aggregates the values that belong to the same key. .reduceByKey is more like the MapReduce concept of reducing because only the values belonging to the same key are aggregated to give the final result during the reduce phase. The shuffle phase ensures that the data received by the reducer is sorted and grouped together by key. 
+
+
+4. When finding popular Wikipedia pages, the maximum number of page views is certainly unique, but the most popular page might be a tie. What would your improved Python implementation do if there were two pages with the same highest number of page views in an hour? What would be necessary to make your code find all of the pages views the maximum number of times? (Again, you don't have to actually implement this.)
+
+I would need to change my get_maximum function so that I take care of 3 separate cases: 1) wiki A has greater count than wiki B, 2) wiki B has greater count than wiki A, and 3) wiki A and wiki B have the same count. In case 3) we would return a brand new tuple that contains the count and the concatenated string of both wikis.
+
+

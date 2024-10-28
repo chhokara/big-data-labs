@@ -1,0 +1,32 @@
+1. In the Reddit averages execution plan, which fields were loaded? How was the average computed (and was a combiner-like step done)?
+
+The execution plan shows that the score and subreddit fields were loaded. Their types are displayed as bigint and string respectively. The average is computed in multiple steps. After the initial file scan, a HashAggregate step is performed which computes a partial average of the score (like a combiner step). The data is then repartitioned using hashpartitioning before the final average score is computed.
+
+2. What was the running time for your Reddit averages implementations in the five scenarios described above? How much difference did Python implementation make (PyPy vs the default CPython)? Why was it large for RDDs but not for DataFrames?
+
+Spark DataFrames (with CPython): 1m42.210s
+Spark RDDs (with CPython): 2m25.272s
+Spark DataFrames (with PyPy): 1m32.416s
+Spark RDDs (with PyPy): 1m11.021s
+MapReduce: 2m40.971s
+
+PyPy implementation ran about 1 minute faster for RDDs and 10 seconds faster for Dataframes.
+
+The PyPy implementation was much faster in the case of RDDs than it was for Dataframes. This is because the underlying implementation of Dataframes interacts with the JVM, which means any optimizations for Python will not influence the JVM-based Dataframes implementation to a great extent. On the other hand, PyPy will speed up the RDD implementation since the underlying implementation for RDDs relies more on Python function calls.
+
+
+3. How much of a difference did the broadcast hint make to the Wikipedia popular code's running time (and on what data set)?
+
+Testing on pagecounts-3:
+With broadcast hint: 2m23.802s
+Without broadcast hint: 2m27.556s
+
+There was not much of a difference between the two.
+
+4. How did the Wikipedia popular execution plan differ with and without the broadcast hint?
+
+With the broadcast hint, the execution plan includes a BroadcastHashJoin, whereas without the broadcast hint the plan uses a SortMergeJoin instead. In addition, the execution plan for broadcast hint does not include an Exchange before the final join is computed. This is because the smaller dataset already resides in the executor locally, and therefore a shuffle is not required.
+
+5. For the weather data question, did you prefer writing the “DataFrames + Python methods” style, or the “temp tables + SQL syntax” style form solving the problem? Which do you think produces more readable code?
+
+I prefer writing the Dataframes + Python methods because I think the DataFrames code is more readable. It contains fewer lines of code and the Python logic is more succinct and easier to follow. However, If you are an expert at SQL, I can see how the latter approach would be more appealing (no need to write python logic at all).

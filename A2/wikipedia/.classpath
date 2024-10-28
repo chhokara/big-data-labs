@@ -1,0 +1,4 @@
+<classpath>
+    <classpathentry kind="lib" path="./lib/hadoop-mapreduce-client-core-3.3.6.jar"/> 
+    <classpathentry kind="lib" path="./lib/hadoop-common-3.3.6.jar"/>
+</classpath>
