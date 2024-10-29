@@ -1,0 +1,36 @@
+1. What happened when you inserted another row with the same primary key as an existing row?
+
+Inserting another row into the table with the same primary key overwrites the existing row. 
+
+2. What happened when you query a keyspace with replication factor 1 and one node down? How did it behave with replication factor 2 and a node down?
+
+When trying a query with replication factor 1, I had no issues for the first few SELECT queries that I performed. After a few seconds, I received a message saying "NoHostAvailable".
+
+After setting the replication factor back to 2, I was able to continue executing the queries without issue.
+
+3. How did the consistency level affect the results with the node up/down?
+
+After setting the consistency level to ONE, I was able to perform queries even with the node down.
+
+After setting the consistency level to ALL, I was getting errors when I tried to perform queries while the node was down.
+
+4. Which of the WHERE id=? values returned successfully with CONSISTENCY ALL when one of the nodes was down? Why do you think some could be returned but not others?
+
+None of the queries returned successfully with CONSISTENCY ALL. The queries could not be returned because CONSISTENCY ALL requires all replicas to respond. If one of the nodes containing replicas is down when we perform the queries, they will not be returned.
+
+5. What was the CREATE TABLE statement you used for the nasalogs table? What was the primary key you choose, and why?
+
+CREATE TABLE nasalogs (
+  host TEXT,
+  datetime TIMESTAMP,
+  path TEXT,
+  bytes INT,
+  id UUID
+  PRIMARY KEY (host, id)
+);
+
+I made the primary key (host, id) because we are aggregating the data by host for our calculation.  In addition, I made host the partition key because it ensures all records with the same host are together on the same node. The addition of id ensures that the primary key is unique for each record. Finally, this primary key will make sure that data is distributed evenly across the nodes.
+
+6. What was the CQL query you used (or tried) to get the total number of bytes?
+
+SELECT SUM(bytes) FROM nasalogs;
