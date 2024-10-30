@@ -16,7 +16,7 @@ After setting the consistency level to ALL, I was getting errors when I tried to
 
 4. Which of the WHERE id=? values returned successfully with CONSISTENCY ALL when one of the nodes was down? Why do you think some could be returned but not others?
 
-None of the queries returned successfully with CONSISTENCY ALL. The queries could not be returned because CONSISTENCY ALL requires all replicas to respond. If one of the nodes containing replicas is down when we perform the queries, they will not be returned.
+Only WHERE id=4 returned successfully with CONSISTENCY ALL. The other queries could not be returned because CONSISTENCY ALL requires all replicas to respond. If one of the nodes containing replicas is down when we perform the queries, they will not be returned.
 
 5. What was the CREATE TABLE statement you used for the nasalogs table? What was the primary key you choose, and why?
 
@@ -25,7 +25,7 @@ CREATE TABLE nasalogs (
   datetime TIMESTAMP,
   path TEXT,
   bytes INT,
-  id UUID
+  id UUID,
   PRIMARY KEY (host, id)
 );
 

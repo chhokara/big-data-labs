@@ -5,8 +5,8 @@ assert sys.version_info >= (3, 5)  # make sure we have Python 3.5+
 
 
 def main(keyspace, table):
-    nasa_logs = spark.read.format("org.apache.spark.sql.cassandra") \
-        .options(table=table, keyspace=keyspace).load()
+    nasa_logs = spark.read.format("org.apache.spark.sql.cassandra").options(
+        table=table, keyspace=keyspace).load()
     nasa_logs = nasa_logs.groupBy(nasa_logs['host']).agg(F.count(
         'host').alias('count_requests'), F.sum('bytes').alias('sum_request_bytes'))
     nasa_logs = nasa_logs.withColumn("one", F.lit(1))
