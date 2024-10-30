@@ -34,7 +34,7 @@ def main(input, keyspace, table):
     ])
 
     nasa_logs = spark.createDataFrame(nasa_logs, log_schema)
-    nasa_logs = nasa_logs.repartition(500)
+    nasa_logs = nasa_logs.repartition(50)
     nasa_logs.write.format("org.apache.spark.sql.cassandra").options(
         table=table, keyspace=keyspace).mode("append").save()
 
