@@ -4,15 +4,11 @@ Inserting another row into the table with the same primary key overwrites the ex
 
 2. What happened when you query a keyspace with replication factor 1 and one node down? How did it behave with replication factor 2 and a node down?
 
-When trying a query with replication factor 1, I had no issues for the first few SELECT queries that I performed. After a few seconds, I received a message saying "NoHostAvailable".
-
-After setting the replication factor back to 2, I was able to continue executing the queries without issue.
+When trying a query with replication factor 1 and one node down, I received a message saying "NoHostAvailable". After setting the replication factor back to 2, I was able to continue executing the queries without issue.
 
 3. How did the consistency level affect the results with the node up/down?
 
-After setting the consistency level to ONE, I was able to perform queries even with the node down.
-
-After setting the consistency level to ALL, I was getting errors when I tried to perform queries while the node was down.
+After setting the consistency level to ONE, I was able to perform queries even with the node down. After setting the consistency level to ALL, I was getting errors when I tried to perform queries while the node was down. If the node is up, the queries will work regardless of the consistency level.
 
 4. Which of the WHERE id=? values returned successfully with CONSISTENCY ALL when one of the nodes was down? Why do you think some could be returned but not others?
 
