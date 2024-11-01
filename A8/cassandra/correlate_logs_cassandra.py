@@ -37,7 +37,7 @@ if __name__ == "__main__":
     keyspace = sys.argv[1]
     table = sys.argv[2]
     cluster_seeds = ['node1.local', 'node2.local']
-    spark = SparkSession.builder.appName('Load logs into Cassandra').config(
+    spark = SparkSession.builder.appName('Cassandra correlate logs').config(
         'spark.cassandra.connection.host', ','.join(cluster_seeds)).getOrCreate()
     assert spark.version >= '3.0'  # make sure we have Spark 3.0+
     spark.sparkContext.setLogLevel('WARN')
