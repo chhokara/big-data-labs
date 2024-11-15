@@ -1,0 +1,137 @@
+1. Do people from Ontario tend to put larger purchases on one payment method?
+
+People from Ontario tend to put larger purchases on the credit payment method.
+
+Query:
+
+SELECT AVG(purchases.amount) as average_amount, paymentmethods.mtype as payment_method
+FROM purchases
+JOIN customers ON purchases.custid = customers.custid
+JOIN paymentmethods ON purchases.pmid = paymentmethods.pmid
+WHERE customers.province = 'ON'
+GROUP BY payment_method;
+
+Results:
+
+average_amount  payment_method
+101.06          debit
+131.4           credit
+
+
+2.Consider the three groups of people: people who live in the Vancouver region, visitors from other BC areas, and visitors from outside BC altogether. Which group spent the most per transaction?
+
+a. The group outside of BC spent the most per transaction.
+
+b. 
+Query:
+
+DROP VIEW IF EXISTS vancouver_custs;
+CREATE VIEW vancouver_custs AS
+WITH vprefixes (vp) AS
+    (SELECT DISTINCT pcprefix FROM greater_vancouver_prefixes)
+SELECT customers.custid AS custid,
+    CASE WHEN (SELECT COUNT(*) FROM vprefixes WHERE vprefixes.vp = SUBSTRING(customers.postalcode, 1, 3)) = 1 
+        THEN 1
+        ELSE 0
+    END AS in_vancouver
+FROM customers
+ORDER BY customers.custid ASC;
+
+c.
+Query:
+
+SELECT
+    CASE WHEN (vancouver_custs.in_vancouver = 0 AND customers.province = 'BC')
+        THEN true
+        ELSE false
+    END AS From_BC_non_Van,
+    CASE WHEN (vancouver_custs.in_vancouver = 1) 
+        THEN true
+        ELSE false
+    END AS From_Van,
+    COUNT(*) AS Count,
+    AVG(purchases.amount) AS Average,
+    MEDIAN(purchases.amount) AS Median
+FROM customers
+JOIN vancouver_custs ON customers.custid = vancouver_custs.custid
+JOIN purchases ON customers.custid = purchases.custid
+GROUP BY From_BC_non_Van, From_Van
+ORDER BY Median ASC;
+
+Results:
+
+from_bc_non_van  from_van   count   average    median
+false            true       10384   86.01       27.37
+true             false      3899    95.16       30.08
+false            false      15717   112.89      33.27
+
+3. Who spends more at restaurants that serve sushi: locals (residents of Greater Vancouver) or tourists?
+
+a. People outside of Greater Vancouver (tourists) spend more at restaurants that serve sushi.
+
+b. 
+Query:
+
+DROP VIEW IF EXISTS sushi;
+CREATE VIEW sushi AS 
+WITH amenids (aids) AS
+    (SELECT amenid FROM amenities WHERE tags.cuisine IS NOT NULL AND amenity = 'restaurant' AND tags.cuisine ILIKE '%sushi%')
+SELECT * FROM amenids;
+
+SELECT AVG(purchases.amount) AS avg, vancouver_custs.in_vancouver AS in_vancouver
+FROM vancouver_custs
+JOIN purchases ON purchases.custid = vancouver_custs.custid
+JOIN sushi ON purchases.amenid = sushi.aids
+GROUP BY vancouver_custs.in_vancouver
+ORDER BY avg ASC;
+
+Results:
+
+avg	in_vancouver
+77.57	1
+85.8	0
+
+4. What was the average purchase per day for the first five days of August?
+a.
+For August 1 it was 96.59, for August 2 it was 106.56, for August 3 it was 95.87, for August 4 it was 115.5, and for August 5 it was 95.67.
+
+b.
+Query:
+
+SELECT purchases.pdate, AVG(purchases.amount)
+FROM purchases
+WHERE DATE_PART(year, purchases.pdate) = 2021 AND
+DATE_PART(month, purchases.pdate) = 8 AND
+DATE_PART(day, purchases.pdate) IN (1, 2, 3, 4, 5)
+GROUP BY purchases.pdate
+ORDER BY purchases.pdate ASC;
+
+Result:
+
+pdate		avg
+2021-08-01	96.59
+2021-08-02	106.56	
+2021-08-03	95.87
+2021-08-04	115.5
+2021-08-05	95.67
+
+c.
+94.06KB
+4703 rows
+
+Ratio - 20 bytes per row
+
+d.
+267396 bytes
+4703 rows
+
+Ratio - 56.86 bytes per row
+
+e.
+From these values, we can infer that Redshift scans the table in a column-wise fashion which reduces the total amount of data read because it only reads the columns that are relevant to our query. On the other hand, Spectrum scans data in an s3 bucket which is hive partitioned and this means that it will only scan files which match our WHERE clause. However, it must still scan every row (including all columns) within the relevant partition which may lead to more data being read.
+
+f.
+If the dataset has a large number of columns (is wide) with a decent number of rows, we can benefit from using redshift because it will only scan the columns that we specify in our query. In addition, if we are querying our data frequently, then redshift will be helpful.
+
+g.
+If the dataset is in a nice format such as parquet and it is partitioned by a certain column and each partition contains a moderate number of rows, then it would be best to retain the data in s3 and query it using spectrum.
