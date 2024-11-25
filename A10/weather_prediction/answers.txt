@@ -1,0 +1,67 @@
+1. What is your best guess for the slope and intercept of the streaming points being produced?
+
+After executing 100 batches:
+
+Best slope: -7.349299708371832
+Best intercept: 33.443621987266056
+
+2. Is your streaming program's estimate of the slope and intercept getting better as the program runs? (That is: is the program aggregating all of the data from the start of time, or only those that have arrived since the last output?)
+
+Yes, the estimate of the slope and intercept is getting better since the program is aggregating all of the data from the start of time. 
+
+3. In the colour classification question, what were your validation scores for the RGB and LAB pipelines?
+
+Validation score for RGB model: 0.560493
+Validation score for LAB model: 0.693400636773578
+
+4. When predicting the tmax values, did you over-fit the training data (and for which training/validation sets)?
+
+From training/validation sets tmax-1:
+Training r2 - 0.9040942834573507
+Testing r2 - 0.5786022376643027
+
+The training score is higher than the testing score, which suggests overfitting of the tmax-1 training data.
+
+From training/validation sets tmax-2:
+Training r2 - 0.8269397998270817
+Testing r2 - 0.7969954405934389
+
+The training score and testing score are closer here, which suggests that there is no overfitting of the tmax-2 training data.
+
+5. What were your testing scores for your model with and without the “yesterday's temperature” feature?
+
+Using tmax-1:
+
+With yesterday's:
+r2 - 0.8600076209034205
+rmse - 4.837317080083779
+
+Without yesterday's:
+r2 - 0.5360599426682103
+rmse - 8.834930697192442
+
+6. If you're using a tree-based model, you'll find a .featureImportances property that describes the relative importance of each feature (code commented out in weather_test.py; if not, skip this question). Have a look with and without the “yesterday's temperature” feature: do the results make sense and suggest that your model is making decisions reasonably? With “yesterday's temperature”, is it just predicting “same as yesterday”?
+
+Using tmax-1:
+
+With yesterday's:
+(5,[0,1,2,3,4],[0.12163299770195193,0.04376879470296479,0.022467467191711887,0.14387715062211184,0.6682535897812594])
+
+'latitude' - 0.12163299770195193
+'longitude' - 0.04376879470296479
+'elevation' - 0.022467467191711887
+'day_of_year' - 0.14387715062211184
+'yesterday_tmax' - 0.6682535897812594
+
+This model says that the 'yesterday_tmax' feature is of highest importance (~ 66%) while the other features are not as important. Although this is not exactly predicting "same as yesterday", it makes sense because it suggests that yesterday's weather plays a significant role in the predictions for tomorrow's weather. It also aligns with our natural intuition that if the weather today is good/bad, then we can infer that the weather for tomorrow will at least be somewhat similar.
+
+Without yesterday's:
+(4,[0,1,2,3],[0.31957837004104106,0.15424542725129786,0.09480990260007013,0.4313663001075908])
+
+'latitude' - 0.31957837004104106
+'longitude' - 0.15424542725129786
+'elevation' - 0.09480990260007013
+'day_of_year' - 0.4313663001075908
+
+This model says that the 'day_of_year' feature is the most important (~ 43%) while still giving some importance to 'latitude' and 'longitude', and very little importance to 'elevation'. These results make sense because the model has no information about yesterday's weather which means more importance will be placed on the location and current season. Furthermore, the variations in elevation will not play a big role in predicting tomorrow's weather. More specifically, the weather will be similar whether we are on top of a mountain or at street level.
+
